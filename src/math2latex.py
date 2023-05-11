@@ -5,9 +5,13 @@ import numpy as np
 
 # cnn_model = pickle.load(open('../models/cnn_model.pkl', 'rb'))
 class Component:
-    def __init__(self, component, centroid):
+    def __init__(self, component, centroid, left, top ,width ,height):
         self.component = component
         self.centroid = centroid
+        self.left = left
+        self.top = top
+        self.width = width
+        self.height = height
 
 path = '../inputs/'
 for i, img in enumerate(os.listdir(path)):
@@ -22,13 +26,17 @@ for i, img in enumerate(os.listdir(path)):
 
     for i in range(1, totalLabels):
         area = values[i, cv2.CC_STAT_AREA]
+        x1 = values[i, cv2.CC_STAT_LEFT]
+        y1 = values[i, cv2.CC_STAT_TOP]
+        w = values[i, cv2.CC_STAT_WIDTH]
+        h = values[i, cv2.CC_STAT_HEIGHT]
         if (area > 50) and (area < 15000):
             component = np.zeros(out_shape, dtype="uint8")
             mask = (label_ids == i).astype("uint8")*255
             component = cv2.bitwise_or(component, mask)
             component = cv2.bitwise_not(component, mask)
-            component_obj = Component(component, centroid[i,])
-            component_list.append(component_obj)       
+            component_obj = Component(component, centroid[i,], x1, y1, w, h)
+            component_list.append(component_obj)
 
     i = 0
     while i < len(component_list) - 1:
@@ -42,11 +50,38 @@ for i, img in enumerate(os.listdir(path)):
             nextY = next.centroid[1]
             if abs(currX - nextX) < 60 and abs(currY - nextY) < 100:
                 curr.component = cv2.bitwise_and(curr.component, next.component)
+                curr.centroid = abs(curr.centroid + next.centroid)/2
+                curr.width = int(max(curr.left + curr.width, next.left + next.width) - min(curr.left, next.left))
+                if (curr.top + curr.height) <= (next.top + next.height):
+                    curr.height = int(curr.height + next.height + abs((curr.top + curr.height) - next.top))
+                else:
+                    curr.height = int(curr.height + next.height + abs((next.top + next.height) - curr.top))
+                curr.left = min(curr.left, next.left)
+                curr.top = min(curr.top, next.top)
                 component_list.remove(next)
             else:
                 j += 1
         i+=1
 
     for c in component_list:
-        cv2.imshow("Final", c.component)
+        new_img = image.copy()
+        pt1 = (c.left, c.top)
+        print(c.component.shape)
+        c.component = c.component[c.top:c.top+c.height, c.left:c.left+c.width]
+        print(c.component.shape)
+        if c.width > c.height:
+            max_dim = c.width
+            if max_dim < 45:
+                max_dim = 45
+            pad = max_dim - c.height
+            c.component = cv2.copyMakeBorder(c.component, int(pad/2), int(pad/2), 0, 0, cv2.BORDER_CONSTANT, value=(255,255,255))
+        else:
+            max_dim = c.height
+            if max_dim < 45:
+                max_dim = 45
+            pad = max_dim - c.width
+            c.component = cv2.copyMakeBorder(c.component, 0, 0, int(pad/2), int(pad/2), cv2.BORDER_CONSTANT, value=(255, 255, 255))
+        c.component = cv2.resize(c.component, (45, 45))
+        print(c.component.shape, "\n")
+        cv2.imshow("Component", c.component)
         cv2.waitKey(0)
