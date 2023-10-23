@@ -4,7 +4,6 @@ from keras import Sequential
 from keras.layers import Input, Dense, Dropout, Flatten, Conv2D, MaxPool2D
 import numpy as np
 import pandas as pd
-import scipy
 import matplotlib
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
