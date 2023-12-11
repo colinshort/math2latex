@@ -35,19 +35,19 @@ results = []
 for i, img in enumerate(os.listdir(path)):
     image = cv2.imread((os.path.join(path, img)))
     img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    cv2.imshow("Grayscale Image", img)
-    cv2.waitKey(0)
+    # cv2.imshow("Grayscale Image", img)
+    # cv2.waitKey(0)
     out_shape = img.shape
     img = cv2.GaussianBlur(img, (3, 3), 10)
-    cv2.imshow("Blurred Image", img)
-    cv2.waitKey(0)
+    # cv2.imshow("Blurred Image", img)
+    # cv2.waitKey(0)
     threshold = cv2.threshold(img, 0, 244, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
-    cv2.imshow("Binary Image", threshold)
-    cv2.waitKey(0)
+    # cv2.imshow("Binary Image", threshold)
+    # cv2.waitKey(0)
     kernel = np.ones((3, 3))
-    proc_img = cv2.morphologyEx(threshold, cv2.MORPH_CLOSE, kernel, iterations=3)
-    cv2.imshow("Closing Image", proc_img)
-    cv2.waitKey(0)
+    proc_img = cv2.morphologyEx(threshold, cv2.MORPH_CLOSE, kernel, iterations=2)
+    # cv2.imshow("Closing Image", proc_img)
+    # cv2.waitKey(0)
     (totalLabels, label_ids, values, centroid) = cv2.connectedComponentsWithStats(proc_img, 4, cv2.CV_32S)
 
     component_list = []
@@ -150,7 +150,7 @@ for i, img in enumerate(os.listdir(path)):
                 print("PAIR", pair)
                 print("\tConfidence:", y_pred[i][pred])
                 result = result + pair[1] + " "
-                cv2.imshow("Component " + str(i), component_imgs[i])
+                cv2.imshow("Component " + str(i) +" - " + str(pred), component_imgs[i])
                 cv2.waitKey(0)
         i += 1
     results.append(result)

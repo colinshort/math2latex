@@ -17,14 +17,16 @@ X = X.reshape(X.shape[0], int(math.sqrt(X.shape[1])), int(math.sqrt(X.shape[1]))
 
 num_labels = max(Y) + 1
 
-x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, random_state=42)
 
 cnn_layers = [Input((45,45,1)),
-Conv2D(16, 3, padding="same", activation="relu"),
+Conv2D(256, 5, padding="same", activation="relu"),
 MaxPool2D(),
-Conv2D(32, 3, padding="same", activation="relu"),
+Conv2D(128, 3, padding="same", activation="relu"),
 MaxPool2D(),
+Dropout(0.5),
 Flatten(),
+Dense(128, activation="relu"),
 Dense(num_labels, activation="softmax")]
 cnn_model = Sequential(cnn_layers)
 
@@ -52,7 +54,7 @@ plt.xlabel('Epoch')
 plt.ylabel('Accuracy')
 plt.grid(True)
 
-plt.show()
+plt.savefig("training_plots.jpg")
 
 print(f"\nAccuracy on the final epoch of training was {100*history.history['accuracy'][-1]:0.2f}%")
 
