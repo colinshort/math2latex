@@ -148,8 +148,11 @@ for i, img in enumerate(os.listdir(path)):
         for pair in label_pairs:
             if int(pair[0]) == pred:
                 result = result + pair[1] + " "
+                pred_label = pair[1]
+                if "\\" in pred_label:
+                    pred_label = pred_label[1:]
                 if verbose:
-                    cv2.imwrite("../outputs/component " + str(i) + "-" + str(j) +" - " + str(pair[1]) + ".png", component_imgs[j])
+                    cv2.imwrite("../outputs/component " + str(i) + "-" + str(j) +" - " + str(pred_label) + ".png", component_imgs[j])
         j += 1
     results.append(result)
 
